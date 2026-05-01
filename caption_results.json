@@ -1,0 +1,62 @@
+[
+  {
+    "id": "tumblr_nhv8yzFmkd1u3l54uo1_400",
+    "url": "https://38.media.tumblr.com/788a5bbb7b0c4432b9d6699b4da327f2/tumblr_nhv8yzFmkd1u3l54uo1_400.gif",
+    "baseline_caption": "<start> a man is holding a guitar and bobbing his head.",
+    "vitgpt2_caption": "a man in a black shirt playing a guitar and front of a microphone",
+    "smolvlm_caption": "A man is playing a guitar and singing.",
+    "baseline_ms": 255,
+    "vitgpt2_ms": 577,
+    "smolvlm_ms": 540
+  },
+  {
+    "id": "tumblr_no4ptzwyDv1qm9n8co1_400",
+    "url": "https://38.media.tumblr.com/fab4bf9cfc2470a6cbeb8133ed170354/tumblr_no4ptzwyDv1qm9n8co1_400.gif",
+    "baseline_caption": "<start> a man with long hair is holding a microphone turns his head",
+    "vitgpt2_caption": "a woman in a black dress is talking on a cell phone and tie standing",
+    "smolvlm_caption": "A man with long blonde hair is singing into a microphone.",
+    "baseline_ms": 46,
+    "vitgpt2_ms": 513,
+    "smolvlm_ms": 918
+  },
+  {
+    "id": "tumblr_nqrrpz9Ke81qhvqi6o1_400",
+    "url": "https://38.media.tumblr.com/b10883172762e3f05d169d1146e6eac1/tumblr_nqrrpz9Ke81qhvqi6o1_400.gif",
+    "baseline_caption": "<start> a woman is waving her tongue around to show her tongue piercing.",
+    "vitgpt2_caption": "a person with a toothbrush in their mouth and young woman wearing glasses",
+    "smolvlm_caption": "A man with a nose ring is talking.",
+    "baseline_ms": 32,
+    "vitgpt2_ms": 495,
+    "smolvlm_ms": 544
+  },
+  {
+    "id": "tumblr_ni4qhxft1T1tnkki4o1_400",
+    "url": "https://38.media.tumblr.com/d5163408cc6b787661a0eb3fa439b9e5/tumblr_ni4qhxft1T1tnkki4o1_400.gif",
+    "baseline_caption": "<start> this gif is of a young man smiling and also has a cut",
+    "vitgpt2_caption": "a young man is looking at the camera and white photo",
+    "smolvlm_caption": "A man is talking and making faces.",
+    "baseline_ms": 38,
+    "vitgpt2_ms": 498,
+    "smolvlm_ms": 529
+  },
+  {
+    "id": "tumblr_notz47rcwY1sq24x8o1_400",
+    "url": "https://38.media.tumblr.com/43138cf3dbb61c6b0bb922b6ee346d76/tumblr_notz47rcwY1sq24x8o1_400.gif",
+    "baseline_caption": "<start> a girl is showing off her new dance moves to her friend.",
+    "vitgpt2_caption": "a woman standing next to a man in a store and front of a wall",
+    "smolvlm_caption": "A woman is dancing in a room with a sign that says \"1924\".",
+    "baseline_ms": 36,
+    "vitgpt2_ms": 494,
+    "smolvlm_ms": 698
+  },
+  {
+    "id": "tumblr_npdeeniOGl1s06j30o1_400",
+    "url": "https://38.media.tumblr.com/9d1b882d1ac6d85c015d57939fa7e74c/tumblr_npdeeniOGl1s06j30o1_400.gif",
+    "baseline_caption": "<start> a car is passing through water with speed.",
+    "vitgpt2_caption": "a car that is going down the road with smoke coming out of it and driving down a dirt road",
+    "smolvlm_caption": "A race car is driving through a puddle.",
+    "baseline_ms": 37,
+    "vitgpt2_ms": 512,
+    "smolvlm_ms": 568
+  }
+]

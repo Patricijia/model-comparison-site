@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GIF Accessibility: Model Comparison</title>
+<style>
+:root{--bg:#0f1117;--card:#1a1d27;--border:#2a2d3a;--accent:#6c63ff;--accent2:#00c9a7;--accent3:#f7768e;--text:#e4e4e7;--muted:#9ca3af;--gold:#ffd700}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);line-height:1.6}
+.container{max-width:1300px;margin:0 auto;padding:0 24px}
+
+/* Hero */
+.hero{text-align:center;padding:50px 24px 30px;background:linear-gradient(135deg,#1a1d27,#0f1117);border-bottom:1px solid var(--border)}
+.hero h1{font-size:2.2rem;font-weight:700;margin-bottom:8px;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero p{color:var(--muted);font-size:1.05rem;max-width:750px;margin:0 auto}
+
+/* Nav */
+.nav{display:flex;gap:6px;justify-content:center;padding:20px 0 0;flex-wrap:wrap;position:sticky;top:0;z-index:100;background:var(--bg);padding-bottom:12px}
+.nav a{padding:8px 18px;border:1px solid var(--border);background:var(--card);color:var(--muted);border-radius:6px;font-size:0.85rem;text-decoration:none;transition:all 0.2s}
+.nav a:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
+
+/* Sections */
+.section{padding:40px 0;border-bottom:1px solid var(--border);scroll-margin-top:60px}
+.section-title{font-size:1.6rem;font-weight:700;margin-bottom:6px}
+.section-sub{color:var(--muted);margin-bottom:24px;font-size:0.95rem}
+
+/* Cards */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;margin-bottom:24px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;position:relative;overflow:hidden}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.card.c1::before{background:var(--accent3)}.card.c2::before{background:var(--accent)}.card.c3::before{background:var(--accent2)}
+.card h3{font-size:1.05rem;margin-bottom:3px}.card .sub{color:var(--muted);font-size:0.8rem;margin-bottom:12px}
+.stat{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:0.85rem}
+.stat:last-child{border-bottom:none}
+.stat-l{color:var(--muted)}.stat-v{font-weight:600}
+
+/* Tables */
+.tbl{width:100%;border-collapse:collapse;background:var(--card);border-radius:10px;overflow:hidden;margin-bottom:20px;font-size:0.9rem}
+.tbl th,.tbl td{padding:10px 14px;text-align:center;border-bottom:1px solid var(--border)}
+.tbl th{background:#22253a;font-weight:600;font-size:0.8rem;text-transform:uppercase;letter-spacing:0.5px;color:var(--muted)}
+.tbl th:first-child,.tbl td:first-child{text-align:left}
+.tbl tr:last-child td{border-bottom:none}
+.best{color:var(--accent2);font-weight:700}
+.worst{color:var(--accent3);opacity:0.7}
+
+/* Bars */
+.bar-chart{display:flex;flex-direction:column;gap:12px;margin:16px 0}
+.bar-group .bar-label{font-size:0.8rem;color:var(--muted);margin-bottom:4px}
+.bars{display:flex;flex-direction:column;gap:3px}
+.bar-row{display:flex;align-items:center;gap:8px}
+.bar-name{font-size:0.75rem;width:110px;text-align:right;color:var(--muted)}
+.bar{height:24px;border-radius:5px;display:flex;align-items:center;padding-left:8px;font-size:0.75rem;font-weight:600;color:#fff;min-width:30px}
+.bar.c1{background:var(--accent3)}.bar.c2{background:var(--accent)}.bar.c3{background:var(--accent2)}
+
+/* Pipeline */
+.pipeline{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:16px}
+.pipeline h4{margin-bottom:12px}
+.pipeline-flow{display:flex;align-items:center;gap:0;overflow-x:auto;padding-bottom:8px}
+.pipeline-step{display:flex;flex-direction:column;align-items:center;flex-shrink:0}
+.pipeline-arrow{font-size:1.3rem;color:var(--muted);padding:0 6px}
+.pipeline-label{font-size:0.65rem;color:var(--muted);text-align:center;margin-top:4px;max-width:100px}
+.pipeline-box{padding:8px 12px;border-radius:6px;font-size:0.75rem;font-weight:600;text-align:center;white-space:nowrap}
+.pipeline-out{padding:8px 10px;background:rgba(255,255,255,0.05);border-radius:6px;font-size:0.8rem;font-style:italic;max-width:180px;text-align:center;line-height:1.3}
+
+/* Clocks */
+.clocks{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:20px 0}
+.clock{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;text-align:center}
+.clock h4{margin-bottom:8px;font-size:0.95rem}
+.clock .val{font-size:2rem;font-weight:700}.clock .unit{color:var(--muted);font-size:0.8rem}
+.clock .detail{color:var(--muted);font-size:0.75rem;margin-top:4px}
+
+/* Info box */
+.info{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:16px}
+.info h4{margin-bottom:10px}
+.info p,.info li{color:var(--muted);font-size:0.85rem;line-height:1.6}
+.info ul{margin:8px 0 8px 20px}
+
+/* Grid images */
+.grid-vis{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:16px 0}
+.grid-vis .item{text-align:center}
+.grid-vis .item img{width:100%;border-radius:6px;border:2px solid var(--border)}
+.grid-vis .item .label{font-size:0.75rem;color:var(--muted);margin-top:4px}
+
+/* Page-to-Accessible highlight cards */
+.pta-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:24px 0}
+.pta-card{background:var(--card);border-radius:14px;padding:24px;text-align:center;position:relative;overflow:hidden;border:2px solid var(--border);transition:transform 0.3s,box-shadow 0.3s}
+.pta-card:hover{transform:translateY(-4px);box-shadow:0 8px 30px rgba(0,0,0,0.4)}
+.pta-card.winner{border-color:var(--gold);box-shadow:0 0 20px rgba(255,215,0,0.15)}
+.pta-card.winner::after{content:'FASTEST';position:absolute;top:12px;right:-28px;background:var(--gold);color:#000;font-size:0.6rem;font-weight:800;padding:2px 30px;transform:rotate(45deg);letter-spacing:1px}
+.pta-card h4{margin-bottom:6px;font-size:0.95rem}
+.pta-card .big-val{font-size:2.8rem;font-weight:800;line-height:1;margin:8px 0}
+.pta-card .big-unit{font-size:0.85rem;color:var(--muted);margin-bottom:12px}
+.pta-card .pta-detail{font-size:0.75rem;color:var(--muted);line-height:1.4}
+.pta-card .pta-bar{height:6px;border-radius:3px;margin:12px auto 0;transition:width 1.5s ease}
+.pta-card .pta-bar.animate{animation:barGrow 1.5s ease forwards}
+@keyframes barGrow{from{width:0}to{width:var(--target-width)}}
+@keyframes pulseGlow{0%,100%{box-shadow:0 0 20px rgba(255,215,0,0.15)}50%{box-shadow:0 0 35px rgba(255,215,0,0.3)}}
+.pta-card.winner{animation:pulseGlow 3s ease infinite}
+
+/* Count-up animation */
+@keyframes countUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.pta-card .big-val{animation:countUp 0.8s ease forwards}
+
+/* GIF examples */
+.examples{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:16px;margin:20px 0}
+.example{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.example-gif{width:100%;height:180px;object-fit:cover;background:#22253a;display:block}
+.example-captions{padding:16px}
+.caption-row{display:flex;gap:10px;padding:7px 0;border-bottom:1px solid var(--border);align-items:flex-start}
+.caption-row:last-child{border-bottom:none}
+.caption-tag{font-size:0.65rem;font-weight:700;text-transform:uppercase;padding:2px 7px;border-radius:3px;white-space:nowrap;flex-shrink:0}
+.caption-tag.t1{background:rgba(247,118,142,0.2);color:var(--accent3)}
+.caption-tag.t2{background:rgba(108,99,255,0.2);color:var(--accent)}
+.caption-tag.t3{background:rgba(0,201,167,0.2);color:var(--accent2)}
+.caption-text{font-size:0.85rem;line-height:1.4}
+
+@media(max-width:900px){.cards,.clocks,.grid-vis,.pta-cards,.examples{grid-template-columns:1fr}.nav{flex-wrap:wrap}}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <h1>GIF Accessibility Captioning</h1>
+  <p>Comparing three approaches to automated GIF accessibility: CNN-LSTM, ViT-GPT2, and SmolVLM. Each model is evaluated for caption quality (TGIF metrics), browser deployment latency, and architectural trade-offs.</p>
+</div>
+
+<div class="nav">
+  <a href="#examples">Examples</a>
+  <a href="#baseline">Previous Research</a>
+  <a href="#cnn-lstm">CNN-LSTM</a>
+  <a href="#vitgpt2">ViT-GPT2</a>
+  <a href="#smolvlm">SmolVLM</a>
+  <a href="#comparison">Comparison</a>
+  <a href="#deployment">Deployment</a>
+</div>
+
+<div class="container">
+
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<!-- GIF CAPTION EXAMPLES -->
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<div class="section" id="examples">
+  <h2 class="section-title">Caption Examples: Same GIFs, Three Models</h2>
+  <p class="section-sub">Each GIF is captioned by all three architectures. CNN-LSTM processes 16 frames sequentially through BiLSTM. ViT-GPT2 captions 4 frames independently and summarizes. SmolVLM sees a 16-frame grid as one image.</p>
+
+  <div class="examples">
+    <!-- Example 1: Guitar -->
+    <div class="example">
+      <img class="example-gif" src="https://38.media.tumblr.com/788a5bbb7b0c4432b9d6699b4da327f2/tumblr_nhv8yzFmkd1u3l54uo1_400.gif" alt="Guitar GIF" onerror="this.style.display='none'">
+      <div class="example-captions">
+        <div class="caption-row"><span class="caption-tag t1">CNN-LSTM</span><span class="caption-text">a man is holding a guitar and bobbing his head</span></div>
+        <div class="caption-row"><span class="caption-tag t2">ViT-GPT2</span><span class="caption-text">a man in a black shirt playing a guitar and front of a microphone</span></div>
+        <div class="caption-row"><span class="caption-tag t3">SmolVLM</span><span class="caption-text">a man is playing a guitar and singing</span></div>
+      </div>
+    </div>
+
+    <!-- Example 2: Long hair -->
+    <div class="example">
+      <img class="example-gif" src="https://38.media.tumblr.com/fab4bf9cfc2470a6cbeb8133ed170354/tumblr_no4ptzwyDv1qm9n8co1_400.gif" alt="Singer GIF" onerror="this.style.display='none'">
+      <div class="example-captions">
+        <div class="caption-row"><span class="caption-tag t1">CNN-LSTM</span><span class="caption-text">a man with long hair is holding a microphone turns his head</span></div>
+        <div class="caption-row"><span class="caption-tag t2">ViT-GPT2</span><span class="caption-text">a woman in a black dress is talking on a cell phone and tie standing</span></div>
+        <div class="caption-row"><span class="caption-tag t3">SmolVLM</span><span class="caption-text">a man with long blonde hair is singing into a microphone</span></div>
+      </div>
+    </div>
+
+    <!-- Example 3: Smiling -->
+    <div class="example">
+      <img class="example-gif" src="https://38.media.tumblr.com/d5163408cc6b787661a0eb3fa439b9e5/tumblr_ni4qhxft1T1tnkki4o1_400.gif" alt="Smiling GIF" onerror="this.style.display='none'">
+      <div class="example-captions">
+        <div class="caption-row"><span class="caption-tag t1">CNN-LSTM</span><span class="caption-text">this gif is of a young man smiling and also has a cut</span></div>
+        <div class="caption-row"><span class="caption-tag t2">ViT-GPT2</span><span class="caption-text">a young man is looking at the camera and white photo</span></div>
+        <div class="caption-row"><span class="caption-tag t3">SmolVLM</span><span class="caption-text">a man is talking and making faces</span></div>
+      </div>
+    </div>
+
+    <!-- Example 4: Car -->
+    <div class="example">
+      <img class="example-gif" src="https://38.media.tumblr.com/9d1b882d1ac6d85c015d57939fa7e74c/tumblr_npdeeniOGl1s06j30o1_400.gif" alt="Car GIF" onerror="this.style.display='none'">
+      <div class="example-captions">
+        <div class="caption-row"><span class="caption-tag t1">CNN-LSTM</span><span class="caption-text">a car is passing through water with speed</span></div>
+        <div class="caption-row"><span class="caption-tag t2">ViT-GPT2</span><span class="caption-text">a car that is going down the road with smoke coming out of it and driving down a dirt road</span></div>
+        <div class="caption-row"><span class="caption-tag t3">SmolVLM</span><span class="caption-text">a race car is driving through a puddle</span></div>
+      </div>
+    </div>
+
+    <!-- Example 5: Woman walking -->
+    <div class="example">
+      <img class="example-gif" src="https://38.media.tumblr.com/43138cf3dbb61c6b0bb922b6ee346d76/tumblr_notz47rcwY1sq24x8o1_400.gif" alt="Walking GIF" onerror="this.style.display='none'">
+      <div class="example-captions">
+        <div class="caption-row"><span class="caption-tag t1">CNN-LSTM</span><span class="caption-text">a girl is showing off her new dance moves to her friend</span></div>
+        <div class="caption-row"><span class="caption-tag t2">ViT-GPT2</span><span class="caption-text">a woman standing next to a man in a store and front of a wall</span></div>
+        <div class="caption-row"><span class="caption-tag t3">SmolVLM</span><span class="caption-text">a woman is dancing in a room with a sign that says "1924"</span></div>
+      </div>
+    </div>
+
+    <!-- Example 6: Head movement -->
+    <div class="example">
+      <img class="example-gif" src="https://38.media.tumblr.com/b10883172762e3f05d169d1146e6eac1/tumblr_nqrrpz9Ke81qhvqi6o1_400.gif" alt="Head GIF" onerror="this.style.display='none'">
+      <div class="example-captions">
+        <div class="caption-row"><span class="caption-tag t1">CNN-LSTM</span><span class="caption-text">a woman is waving her tongue around to show her tongue piercing</span></div>
+        <div class="caption-row"><span class="caption-tag t2">ViT-GPT2</span><span class="caption-text">a person with a toothbrush in their mouth and young woman wearing glasses</span></div>
+        <div class="caption-row"><span class="caption-tag t3">SmolVLM</span><span class="caption-text">a man with a nose ring is talking</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="info">
+    <h4>Observations</h4>
+    <ul>
+      <li><strong>CNN-LSTM</strong> generates action-focused captions ("bobbing his head", "passing through water with speed") because BiLSTM processes the temporal frame sequence. Sometimes hallucinates details.</li>
+      <li><strong>ViT-GPT2</strong> describes static appearances ("a man in a black shirt", "a woman standing next to a man") because it captions each frame independently as a photo. The summarization produces fragmented text.</li>
+      <li><strong>SmolVLM</strong> produces the most concise and accurate captions ("a race car is driving through a puddle") because its Idefics3 architecture natively understands multi-image temporal sequences from the 16-frame grid.</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<!-- PREVIOUS RESEARCH -->
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<div class="section" id="baseline">
+  <h2 class="section-title">Previous Research: CNN-LSTM (Apoorva Bhatnagar, 2021)</h2>
+  <p class="section-sub">GIF Image Descriptor - a CNN-LSTM architecture for generating descriptive texts for GIF images, deployed as a Chrome extension with an Azure Cloud API server.</p>
+
+  <div class="cards">
+    <div class="card c1">
+      <h3>Architecture</h3>
+      <div class="sub">Xception CNN + LSTM Decoder</div>
+      <div class="stat"><span class="stat-l">Vision Encoder</span><span class="stat-v">Xception (Keras)</span></div>
+      <div class="stat"><span class="stat-l">Decoder</span><span class="stat-v">LSTM</span></div>
+      <div class="stat"><span class="stat-l">Embeddings</span><span class="stat-v">GloVe 300D</span></div>
+      <div class="stat"><span class="stat-l">Vocab</span><span class="stat-v">~6,000 words</span></div>
+      <div class="stat"><span class="stat-l">Frames/GIF</span><span class="stat-v">16</span></div>
+      <div class="stat"><span class="stat-l">Input Resolution</span><span class="stat-v">299x299 (Xception)</span></div>
+    </div>
+    <div class="card c1">
+      <h3>Training</h3>
+      <div class="sub">TGIF Dataset, Azure Cloud</div>
+      <div class="stat"><span class="stat-l">Dataset</span><span class="stat-v">TGIF (~90K GIFs)</span></div>
+      <div class="stat"><span class="stat-l">Captions</span><span class="stat-v">Human (TGIF)</span></div>
+      <div class="stat"><span class="stat-l">Framework</span><span class="stat-v">Keras / TensorFlow</span></div>
+      <div class="stat"><span class="stat-l">Training Time</span><span class="stat-v">~6 days (CPU)</span></div>
+      <div class="stat"><span class="stat-l">OCR</span><span class="stat-v">Google Cloud Vision</span></div>
+      <div class="stat"><span class="stat-l">Deployment</span><span class="stat-v">Azure Cloud + Flask API</span></div>
+    </div>
+    <div class="card c1">
+      <h3>Evaluation (TGIF Test)</h3>
+      <div class="sub">4-fold, 10K GIFs each, pycocoevalcap</div>
+      <div class="stat"><span class="stat-l">BLEU-1</span><span class="stat-v">0.530</span></div>
+      <div class="stat"><span class="stat-l">ROUGE-L</span><span class="stat-v">0.390</span></div>
+      <div class="stat"><span class="stat-l">METEOR</span><span class="stat-v">0.203</span></div>
+      <div class="stat"><span class="stat-l">CIDEr</span><span class="stat-v">0.309</span></div>
+      <div class="stat"><span class="stat-l">Latency</span><span class="stat-v">4.5s/GIF (server)</span></div>
+      <div class="stat"><span class="stat-l">Page-to-Accessible</span><span class="stat-v">~45s (10 GIFs, sequential)</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<!-- CNN-LSTM RETRAINED -->
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<div class="section" id="cnn-lstm">
+  <h2 class="section-title">CNN-LSTM Retrained (Browser-Deployable)</h2>
+  <p class="section-sub">Modernized reimplementation using EfficientNet-B0 + BiLSTM + Attention, trained on 80K TGIF GIFs, exported to ONNX for in-browser inference via WASM.</p>
+
+  <div class="cards">
+    <div class="card c1">
+      <h3>Architecture</h3>
+      <div class="sub">EfficientNet-B0 + BiLSTM + Attention</div>
+      <div class="stat"><span class="stat-l">Vision Encoder</span><span class="stat-v">EfficientNet-B0</span></div>
+      <div class="stat"><span class="stat-l">Encoder</span><span class="stat-v">BiLSTM (bidirectional)</span></div>
+      <div class="stat"><span class="stat-l">Decoder</span><span class="stat-v">LSTM + Attention</span></div>
+      <div class="stat"><span class="stat-l">Embeddings</span><span class="stat-v">GloVe 300D</span></div>
+      <div class="stat"><span class="stat-l">Total Params</span><span class="stat-v">16.8M</span></div>
+      <div class="stat"><span class="stat-l">Frames/GIF</span><span class="stat-v">16 (sequential)</span></div>
+      <div class="stat"><span class="stat-l">ONNX Export</span><span class="stat-v" style="color:var(--accent2)">Supported</span></div>
+    </div>
+    <div class="card c1">
+      <h3>Training</h3>
+      <div class="sub">TGIF Human Captions, A100 GPU</div>
+      <div class="stat"><span class="stat-l">Dataset</span><span class="stat-v">TGIF (80K train split)</span></div>
+      <div class="stat"><span class="stat-l">Captions</span><span class="stat-v">Human (TGIF)</span></div>
+      <div class="stat"><span class="stat-l">Epochs</span><span class="stat-v">10 (best: epoch 5)</span></div>
+      <div class="stat"><span class="stat-l">Training Time</span><span class="stat-v">23 min (A100)</span></div>
+      <div class="stat"><span class="stat-l">Vocab</span><span class="stat-v">6,000 words</span></div>
+      <div class="stat"><span class="stat-l">OCR</span><span class="stat-v">Tesseract.js (browser)</span></div>
+    </div>
+    <div class="card c1">
+      <h3>Evaluation (TGIF Test)</h3>
+      <div class="sub">11,199 GIFs (filtered), pycocoevalcap</div>
+      <div class="stat"><span class="stat-l">BLEU-1</span><span class="stat-v">0.490</span></div>
+      <div class="stat"><span class="stat-l">BLEU-4</span><span class="stat-v">0.114</span></div>
+      <div class="stat"><span class="stat-l">ROUGE-L</span><span class="stat-v">0.384</span></div>
+      <div class="stat"><span class="stat-l">METEOR</span><span class="stat-v">0.169</span></div>
+      <div class="stat"><span class="stat-l">CIDEr</span><span class="stat-v">0.249</span></div>
+    </div>
+  </div>
+
+  <!-- CNN-LSTM Pipeline -->
+  <div class="pipeline">
+    <h4 style="color:var(--accent3)">Processing Pipeline</h4>
+    <div class="pipeline-flow">
+      <div class="pipeline-step"><img src="demo_car.gif" alt="GIF" style="width:70px;height:70px;object-fit:cover;border-radius:6px"><div class="pipeline-label">Original GIF</div></div>
+      <div class="pipeline-arrow">→</div>
+      <div class="pipeline-step"><img src="input_baseline.jpg" alt="16 frames" style="width:90px;height:90px;border-radius:4px"><div class="pipeline-label">16 frames<br>224x224 each</div></div>
+      <div class="pipeline-arrow">→</div>
+      <div class="pipeline-step"><div class="pipeline-box" style="background:rgba(247,118,142,0.15);color:var(--accent3);border:1px solid var(--accent3)">EfficientNet-B0<br><span style="font-size:0.65rem;font-weight:400">1280-dim / frame</span></div><div class="pipeline-label">CNN Features</div></div>
+      <div class="pipeline-arrow">→</div>
+      <div class="pipeline-step"><div class="pipeline-box" style="background:rgba(247,118,142,0.15);color:var(--accent3);border:1px solid var(--accent3)">BiLSTM<br>+ Attention</div><div class="pipeline-label">Temporal<br>Encoding</div></div>
+      <div class="pipeline-arrow">→</div>
+      <div class="pipeline-step"><div class="pipeline-out" style="border:1px solid var(--accent3)">"a car is passing through water with speed"</div></div>
+    </div>
+  </div>
+
+  <!-- CNN-LSTM Latency -->
+  <div class="clocks">
+    <div class="clock"><h4 style="color:var(--accent3)">Model Load</h4><div class="val" style="color:var(--accent3)">399</div><div class="unit">ms (one-time)</div><div class="detail">3 ONNX sessions (73 MB total)</div></div>
+    <div class="clock"><h4 style="color:var(--accent3)">Per-GIF Inference</h4><div class="val" style="color:var(--accent3)">847</div><div class="unit">ms</div><div class="detail">WASM, 16 frames, parallel processing</div></div>
+    <div class="clock"><h4 style="color:var(--accent3)">Page-to-Accessible</h4><div class="val" style="color:var(--accent3)">11.3s</div><div class="unit">10 GIFs</div><div class="detail">Parallel, avg over 10 benchmark runs</div></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<!-- VIT-GPT2 -->
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<div class="section" id="vitgpt2">
+  <h2 class="section-title">ViT-GPT2 (VisionEncoderDecoderModel)</h2>
+  <p class="section-sub">Vision Transformer encoder + GPT-2 decoder. Tested as base model (COCO-trained), fine-tuned on TGIF human captions, and distilled from LLaVA. ONNX-exportable architecture.</p>
+
+  <div class="cards">
+    <div class="card c2">
+      <h3>Architecture</h3>
+      <div class="sub">ViT + GPT-2 (VisionEncoderDecoderModel)</div>
+      <div class="stat"><span class="stat-l">Vision Encoder</span><span class="stat-v">ViT (Vision Transformer)</span></div>
+      <div class="stat"><span class="stat-l">Decoder</span><span class="stat-v">GPT-2 (12 layers)</span></div>
+      <div class="stat"><span class="stat-l">Total Params</span><span class="stat-v">278M</span></div>
+      <div class="stat"><span class="stat-l">Input</span><span class="stat-v">224x224 single image</span></div>
+      <div class="stat"><span class="stat-l">ONNX Export</span><span class="stat-v" style="color:var(--accent2)">Fully supported</span></div>
+      <div class="stat"><span class="stat-l">LoRA Targets</span><span class="stat-v">c_attn, c_proj, q_attn, query, value</span></div>
+    </div>
+    <div class="card c2">
+      <h3>Three Variants Tested</h3>
+      <div class="sub">Same architecture, different training</div>
+      <div class="stat"><span class="stat-l">Base (COCO)</span><span class="stat-v">Pre-trained, no GIF training</span></div>
+      <div class="stat"><span class="stat-l">TGIF-trained</span><span class="stat-v">80K TGIF human captions, LoRA</span></div>
+      <div class="stat"><span class="stat-l">LLaVA Distilled</span><span class="stat-v">33K LLaVA captions, LoRA</span></div>
+      <div class="stat"><span class="stat-l">Grid Input</span><span class="stat-v">6-frame 3x2 grid (trained)</span></div>
+      <div class="stat"><span class="stat-l">Per-frame</span><span class="stat-v">4 frames + summarization (base)</span></div>
+    </div>
+    <div class="card c2">
+      <h3>Evaluation (TGIF Test)</h3>
+      <div class="sub">pycocoevalcap, filtered broken GIFs</div>
+      <table class="tbl" style="margin:0;font-size:0.8rem">
+        <tr><th></th><th>Base</th><th>TGIF</th><th>LLaVA</th></tr>
+        <tr><td>BLEU-1</td><td>0.338</td><td class="best">0.367</td><td>0.323</td></tr>
+        <tr><td>BLEU-4</td><td>0.058</td><td class="best">0.082</td><td>0.047</td></tr>
+        <tr><td>ROUGE-L</td><td>0.316</td><td class="best">0.340</td><td>0.264</td></tr>
+        <tr><td>CIDEr</td><td>0.134</td><td class="best">0.145</td><td>0.111</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- ViT-GPT2 Pipeline -->
+  <div class="pipeline">
+    <h4 style="color:var(--accent)">Processing Pipeline (Base: Per-Frame)</h4>
+    <div class="pipeline-flow">
+      <div class="pipeline-step"><img src="demo_car.gif" alt="GIF" style="width:70px;height:70px;object-fit:cover;border-radius:6px"><div class="pipeline-label">Original GIF</div></div>
+      <div class="pipeline-arrow">→</div>
+      <div class="pipeline-step"><img src="input_vitgpt2.jpg" alt="4 frames" style="width:120px;height:50px;border-radius:4px"><div class="pipeline-label">4 frames (224x224)</div></div>
+      <div class="pipeline-arrow">→</div>
+      <div class="pipeline-step"><div class="pipeline-box" style="background:rgba(108,99,255,0.15);color:var(--accent);border:1px solid var(--accent)">ViT-GPT2<br><span style="font-size:0.65rem;font-weight:400">4 separate calls</span></div><div class="pipeline-label">Per-frame<br>Captioning</div></div>
+      <div class="pipeline-arrow">→</div>
+      <div class="pipeline-step"><div class="pipeline-box" style="background:rgba(108,99,255,0.1);color:var(--accent);border:1px dashed var(--accent)">Summarize</div><div class="pipeline-label">Weighted<br>Selection</div></div>
+      <div class="pipeline-arrow">→</div>
+      <div class="pipeline-step"><div class="pipeline-out" style="border:1px solid var(--accent)">"a car going down the road with smoke"</div></div>
+    </div>
+  </div>
+
+  <div class="pipeline">
+    <h4 style="color:var(--accent)">Processing Pipeline (TGIF-Trained: 6-Frame Grid)</h4>
+    <div class="pipeline-flow">
+      <div class="pipeline-step"><img src="demo_car.gif" alt="GIF" style="width:70px;height:70px;object-fit:cover;border-radius:6px"><div class="pipeline-label">Original GIF</div></div>
+      <div class="pipeline-arrow">→</div>
+      <div class="pipeline-step"><div style="width:80px;height:55px;background:#22253a;border-radius:4px;border:2px solid var(--accent);display:flex;align-items:center;justify-content:center;font-size:0.6rem;color:var(--muted)">3x2 grid<br>6 frames</div><div class="pipeline-label">512x512 grid</div></div>
+      <div class="pipeline-arrow">→</div>
+      <div class="pipeline-step"><div class="pipeline-box" style="background:rgba(108,99,255,0.15);color:var(--accent);border:1px solid var(--accent)">ViT-GPT2<br><span style="font-size:0.65rem;font-weight:400">1 call on grid</span></div><div class="pipeline-label">Grid<br>Captioning</div></div>
+      <div class="pipeline-arrow">→</div>
+      <div class="pipeline-step"><div class="pipeline-out" style="border:1px solid var(--accent)">"a race car is driving down a track"</div></div>
+    </div>
+  </div>
+
+  <!-- ViT-GPT2 Latency -->
+  <div class="clocks">
+    <div class="clock"><h4 style="color:var(--accent)">Model Load</h4><div class="val" style="color:var(--accent)">22s</div><div class="unit">one-time (WebGPU)</div><div class="detail">~900 MB model, cached after first load</div></div>
+    <div class="clock"><h4 style="color:var(--accent)">Per-GIF Inference</h4><div class="val" style="color:var(--accent)">13.1s</div><div class="unit">4 frames x 3.3s each</div><div class="detail">WebGPU fp32, parallel after load</div></div>
+    <div class="clock"><h4 style="color:var(--accent)">Page-to-Accessible</h4><div class="val" style="color:var(--accent)">13.3s</div><div class="unit">10 GIFs (excl. model load)</div><div class="detail">Parallel processing, WebGPU</div></div>
+  </div>
+
+  <div class="info">
+    <h4>Key Finding: Distillation Failed for Grid Input</h4>
+    <p>LLaVA distillation (0.323 BLEU-1) performed <strong>worse than the base model</strong> (0.338) and worse than TGIF training (0.367). The ViT encoder, designed for single 224x224 images, cannot meaningfully read tiny 128px frames within a 512x512 grid. TGIF human captions with direct training worked better because the captions are short and match the evaluation style.</p>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<!-- SMOLVLM -->
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<div class="section" id="smolvlm">
+  <h2 class="section-title">SmolVLM-256M Distilled</h2>
+  <p class="section-sub">Vision-Language Model with native multi-image understanding (Idefics3 architecture). Fine-tuned via LoRA using LLaVA-generated captions. Best caption quality but ONNX conversion blocked for browser deployment.</p>
+
+  <div class="cards">
+    <div class="card c3">
+      <h3>Architecture</h3>
+      <div class="sub">Idefics3 (SigLIP + LLM)</div>
+      <div class="stat"><span class="stat-l">Vision Encoder</span><span class="stat-v">SigLIP (multi-image native)</span></div>
+      <div class="stat"><span class="stat-l">Decoder</span><span class="stat-v">LLM (30 layers, Llama-based)</span></div>
+      <div class="stat"><span class="stat-l">Total Params</span><span class="stat-v">256M</span></div>
+      <div class="stat"><span class="stat-l">Trainable (LoRA)</span><span class="stat-v">1.36M (0.53%)</span></div>
+      <div class="stat"><span class="stat-l">Multi-image</span><span class="stat-v" style="color:var(--accent2)">Built-in (Idefics3)</span></div>
+      <div class="stat"><span class="stat-l">ONNX Export</span><span class="stat-v" style="color:var(--accent3)">Blocked (Idefics3 unsupported)</span></div>
+    </div>
+    <div class="card c3">
+      <h3>Training</h3>
+      <div class="sub">LLaVA Distillation, A100 GPU</div>
+      <div class="stat"><span class="stat-l">Teacher</span><span class="stat-v">LLaVA (CIDEr: 0.531)</span></div>
+      <div class="stat"><span class="stat-l">Dataset</span><span class="stat-v">33,919 TGIF GIFs</span></div>
+      <div class="stat"><span class="stat-l">Captions</span><span class="stat-v">LLaVA-generated</span></div>
+      <div class="stat"><span class="stat-l">LoRA</span><span class="stat-v">r=8, alpha=16</span></div>
+      <div class="stat"><span class="stat-l">Epochs</span><span class="stat-v">3</span></div>
+      <div class="stat"><span class="stat-l">Training Time</span><span class="stat-v">5h 29m (A100)</span></div>
+    </div>
+    <div class="card c3">
+      <h3>Evaluation (TGIF Test)</h3>
+      <div class="sub">9,999 GIFs, pycocoevalcap (MSCOCO)</div>
+      <div class="stat"><span class="stat-l">BLEU-1</span><span class="stat-v">0.468</span></div>
+      <div class="stat"><span class="stat-l">BLEU-4</span><span class="stat-v">0.129</span></div>
+      <div class="stat"><span class="stat-l">ROUGE-L</span><span class="stat-v">0.345</span></div>
+      <div class="stat"><span class="stat-l">METEOR</span><span class="stat-v" style="color:var(--accent2)">0.212 (best)</span></div>
+      <div class="stat"><span class="stat-l">CIDEr</span><span class="stat-v" style="color:var(--accent2)">0.375 (best)</span></div>
+    </div>
+  </div>
+
+  <!-- SmolVLM Pipeline -->
+  <div class="pipeline">
+    <h4 style="color:var(--accent2)">Processing Pipeline</h4>
+    <div class="pipeline-flow">
+      <div class="pipeline-step"><img src="demo_car.gif" alt="GIF" style="width:70px;height:70px;object-fit:cover;border-radius:6px"><div class="pipeline-label">Original GIF</div></div>
+      <div class="pipeline-arrow">→</div>
+      <div class="pipeline-step"><img src="input_smolvlm.jpg" alt="4x4 grid" style="width:90px;height:90px;border-radius:4px;border:2px solid var(--accent2)"><div class="pipeline-label">4x4 grid<br>16 frames, 512x512</div></div>
+      <div class="pipeline-arrow">→</div>
+      <div class="pipeline-step"><div class="pipeline-box" style="background:rgba(0,201,167,0.15);color:var(--accent2);border:1px solid var(--accent2)">SmolVLM-256M<br>+ LoRA adapter<br><span style="font-size:0.65rem;font-weight:400">1 forward pass</span></div><div class="pipeline-label">Vision-Language<br>Model</div></div>
+      <div class="pipeline-arrow">→</div>
+      <div class="pipeline-step"><div class="pipeline-out" style="border:1px solid var(--accent2)">"a race car is driving through a puddle"</div></div>
+    </div>
+  </div>
+
+  <!-- SmolVLM Latency -->
+  <div class="clocks">
+    <div class="clock"><h4 style="color:var(--accent2)">Model Load</h4><div class="val" style="color:var(--accent2)">13.1s</div><div class="unit">one-time (WebGPU fp16)</div><div class="detail">~500 MB ONNX, Intel Iris Xe</div></div>
+    <div class="clock"><h4 style="color:var(--accent2)">Per-GIF Inference</h4><div class="val" style="color:var(--accent2)">9.2s</div><div class="unit">single VLM call</div><div class="detail">WebGPU fp16, 16-frame grid</div></div>
+    <div class="clock"><h4 style="color:var(--accent2)">Page-to-Accessible</h4><div class="val" style="color:var(--accent2)">113.6s</div><div class="unit">10 GIFs (excl. load)</div><div class="detail">Sequential (ONNX session lock)</div></div>
+  </div>
+
+  <div class="info">
+    <h4>ONNX Conversion Challenge</h4>
+    <p>The fine-tuned SmolVLM model cannot be deployed in the browser with correct weights. The Idefics3 architecture requires a proprietary ONNX conversion pipeline maintained by the HuggingFace team. Multiple approaches were attempted:</p>
+    <ul>
+      <li><code>optimum-cli export onnx</code> - fails: idefics3 unsupported</li>
+      <li><code>torch.onnx.export</code> - vision encoder fails due to dynamic shapes</li>
+      <li>ONNX weight patching - fused graph nodes ignore patched initializers</li>
+      <li>Sub-model extraction (LlamaForCausalLM + SiglipVisionModel) - fails with PyTorch 2.11</li>
+    </ul>
+    <p>A <a href="https://github.com/huggingface/transformers.js/issues/1622" style="color:var(--accent2)">GitHub issue</a> was filed. The base model runs in the browser (for latency benchmarking) but generates base-model captions, not the fine-tuned quality. Python inference produces correct fine-tuned captions.</p>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<!-- COMPARISON -->
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<div class="section" id="comparison">
+  <h2 class="section-title">Results Comparison</h2>
+  <p class="section-sub">All models evaluated on TGIF test set using pycocoevalcap (MSCOCO library), scoring against all human references simultaneously.</p>
+
+  <!-- Metrics Table -->
+  <table class="tbl">
+    <thead>
+      <tr>
+        <th>Metric</th>
+        <th style="color:var(--accent3)">CNN-LSTM<br>Baseline</th>
+        <th style="color:var(--accent3)">CNN-LSTM<br>Retrained</th>
+        <th style="color:var(--accent2)">SmolVLM<br>Distilled</th>
+        <th style="color:var(--accent)">ViT-GPT2<br>TGIF</th>
+        <th style="color:var(--accent)">ViT-GPT2<br>Base</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>BLEU-1</td><td class="best">0.530</td><td>0.490</td><td>0.468</td><td>0.367</td><td>0.338</td></tr>
+      <tr><td>BLEU-4</td><td>--</td><td>0.114</td><td class="best">0.129</td><td>0.082</td><td>0.058</td></tr>
+      <tr><td>ROUGE-L</td><td class="best">0.390</td><td>0.384</td><td>0.345</td><td>0.340</td><td>0.316</td></tr>
+      <tr><td>METEOR</td><td>0.203</td><td>0.169</td><td class="best">0.212</td><td>--</td><td>0.159</td></tr>
+      <tr><td>CIDEr</td><td>0.309</td><td>0.249</td><td class="best">0.375</td><td>0.145</td><td>0.134</td></tr>
+      <tr><td>Params</td><td>--</td><td>16.8M</td><td>256M</td><td>278M</td><td>278M</td></tr>
+      <tr><td>Browser</td><td>No</td><td style="color:var(--accent2)">Yes (WASM)</td><td style="color:var(--accent3)">No (ONNX blocked)</td><td style="color:var(--accent2)">Yes (ONNX)</td><td style="color:var(--accent2)">Yes (WebGPU)</td></tr>
+    </tbody>
+  </table>
+
+  <!-- Bar Charts -->
+  <div class="bar-chart">
+    <div class="bar-group">
+      <div class="bar-label">BLEU-1</div>
+      <div class="bars">
+        <div class="bar-row"><span class="bar-name">Baseline</span><div class="bar c1" style="width:53%">0.530</div></div>
+        <div class="bar-row"><span class="bar-name">CNN-LSTM</span><div class="bar c1" style="width:49%">0.490</div></div>
+        <div class="bar-row"><span class="bar-name">SmolVLM</span><div class="bar c3" style="width:46.8%">0.468</div></div>
+        <div class="bar-row"><span class="bar-name">ViT-GPT2 TGIF</span><div class="bar c2" style="width:36.7%">0.367</div></div>
+        <div class="bar-row"><span class="bar-name">ViT-GPT2 Base</span><div class="bar c2" style="width:33.8%;opacity:0.6">0.338</div></div>
+      </div>
+    </div>
+    <div class="bar-group">
+      <div class="bar-label">CIDEr</div>
+      <div class="bars">
+        <div class="bar-row"><span class="bar-name">SmolVLM</span><div class="bar c3" style="width:37.5%">0.375</div></div>
+        <div class="bar-row"><span class="bar-name">Baseline</span><div class="bar c1" style="width:30.9%">0.309</div></div>
+        <div class="bar-row"><span class="bar-name">CNN-LSTM</span><div class="bar c1" style="width:24.9%">0.249</div></div>
+        <div class="bar-row"><span class="bar-name">ViT-GPT2 TGIF</span><div class="bar c2" style="width:14.5%">0.145</div></div>
+        <div class="bar-row"><span class="bar-name">ViT-GPT2 Base</span><div class="bar c2" style="width:13.4%;opacity:0.6">0.134</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Metric Explanations -->
+  <div class="info">
+    <h4>Understanding the Metrics</h4>
+    <table class="tbl" style="font-size:0.8rem">
+      <tr><td style="width:80px;font-weight:700">BLEU-1</td><td style="text-align:left">Measures unigram (single word) <strong>precision</strong>. How many words in the generated caption appear in the reference. Higher = more word overlap. CNN-LSTM models score highest because they learned TGIF's word distribution directly.</td></tr>
+      <tr><td style="font-weight:700">BLEU-4</td><td style="text-align:left">Measures 4-gram precision. Requires exact 4-word sequences to match. Very strict - scores of 0.10-0.13 are typical for image captioning. SmolVLM leads here (0.129) despite lower BLEU-1, suggesting more fluent phrase generation.</td></tr>
+      <tr><td style="font-weight:700">ROUGE-L</td><td style="text-align:left">Measures the longest common subsequence between generated and reference captions. Focuses on <strong>recall</strong> - how much of the reference is captured. CNN-LSTM models lead because their short captions match the short TGIF reference style.</td></tr>
+      <tr><td style="font-weight:700">METEOR</td><td style="text-align:left">Uses <strong>synonyms, stemming, and paraphrases</strong> (via WordNet) beyond exact word matching. Better correlated with human judgement. SmolVLM leads (0.212) because it generates semantically accurate descriptions even when wording differs.</td></tr>
+      <tr><td style="font-weight:700">CIDEr</td><td style="text-align:left">Designed specifically for <strong>image captioning</strong>. Uses TF-IDF weighting to reward words distinctive to a specific image (not generic words like "a" or "the"). SmolVLM leads significantly (0.375) because its multi-image understanding captures image-specific details.</td></tr>
+    </table>
+    <p style="color:var(--muted);font-size:0.8rem;margin-top:8px"><strong>Summary:</strong> CNN-LSTM wins surface-level n-gram metrics (BLEU, ROUGE) because its output style matches TGIF references. SmolVLM wins semantic metrics (METEOR, CIDEr) because it understands image content better, even when wording differs from references.</p>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<!-- DEPLOYMENT -->
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<div class="section" id="deployment">
+  <h2 class="section-title">Deployment & Latency Comparison</h2>
+  <p class="section-sub">All three models deployed as Chrome extensions with identical architecture: offscreen document, DESCRIBE_GIF message passing, benchmark metrics, Tesseract.js OCR.</p>
+
+  <!-- Page-to-Accessible hero cards -->
+  <h3 style="text-align:center;color:var(--muted);text-transform:uppercase;letter-spacing:2px;font-size:0.85rem;margin-bottom:4px">Page Load to All 10 GIFs Accessible</h3>
+  <p style="text-align:center;color:var(--muted);font-size:0.8rem;margin-bottom:16px">Excluding one-time model download. Measured on test bench with 10 GIFs.</p>
+
+  <div class="pta-cards">
+    <div class="pta-card winner">
+      <h4 style="color:var(--accent3)">CNN-LSTM Retrained</h4>
+      <div class="big-val" style="color:var(--accent3)">11.3<span style="font-size:1.2rem">s</span></div>
+      <div class="big-unit">WASM (CPU) | Parallel</div>
+      <div class="pta-detail">847ms inference/GIF<br>16 frames, EfficientNet + BiLSTM<br>73 MB model, loads in 399ms</div>
+      <div class="pta-bar" style="background:var(--accent3);width:10%;--target-width:10%"></div>
+    </div>
+    <div class="pta-card">
+      <h4 style="color:var(--accent)">ViT-GPT2</h4>
+      <div class="big-val" style="color:var(--accent)">13.3<span style="font-size:1.2rem">s</span></div>
+      <div class="big-unit">WebGPU (GPU) | Parallel</div>
+      <div class="pta-detail">13.1s inference/GIF, but parallel<br>4 frames x 3.3s per-frame<br>900 MB model, loads in 22s</div>
+      <div class="pta-bar" style="background:var(--accent);width:12%;--target-width:12%"></div>
+    </div>
+    <div class="pta-card">
+      <h4 style="color:var(--accent2)">SmolVLM-256M</h4>
+      <div class="big-val" style="color:var(--accent2)">113.6<span style="font-size:1.2rem">s</span></div>
+      <div class="big-unit">WebGPU fp16 (GPU) | Sequential</div>
+      <div class="pta-detail">9.2s inference/GIF, but sequential<br>ONNX 3-session lock prevents parallel<br>500 MB model, loads in 13s</div>
+      <div class="pta-bar" style="background:var(--accent2);width:100%;--target-width:100%"></div>
+    </div>
+  </div>
+
+  <!-- Detailed latency table -->
+  <table class="tbl">
+    <thead>
+      <tr><th>Metric</th><th style="color:var(--accent3)">CNN-LSTM</th><th style="color:var(--accent)">ViT-GPT2</th><th style="color:var(--accent2)">SmolVLM</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Model Size</td><td>73 MB</td><td>~900 MB</td><td>~500 MB</td></tr>
+      <tr><td>Model Load</td><td class="best">399 ms</td><td>22,063 ms</td><td>13,093 ms</td></tr>
+      <tr><td>Inference / GIF</td><td class="best">847 ms</td><td>13,057 ms</td><td>9,172 ms</td></tr>
+      <tr><td>10 GIFs Total</td><td class="best">11.3s</td><td>13.3s</td><td>113.6s</td></tr>
+      <tr><td>First GIF Ready</td><td class="best">~3s</td><td>~32s</td><td>~12s</td></tr>
+      <tr><td>Processing</td><td>Parallel</td><td>Parallel</td><td>Sequential</td></tr>
+      <tr><td>Compute</td><td>WASM (CPU)</td><td>WebGPU (GPU)</td><td>WebGPU fp16 (GPU)</td></tr>
+      <tr><td>OCR</td><td>Tesseract.js</td><td>Tesseract.js</td><td>Tesseract.js</td></tr>
+      <tr><td>Fine-tuned in Browser</td><td style="color:var(--accent2)">Yes</td><td style="color:var(--accent2)">Yes (ONNX exportable)</td><td style="color:var(--accent3)">No (base model only)</td></tr>
+    </tbody>
+  </table>
+
+  <!-- Parallel vs Sequential explanation -->
+  <div class="info">
+    <h4>Page-to-Accessible: Parallel vs Sequential Processing</h4>
+    <p style="margin-bottom:12px">The "Page-to-Accessible" time measures how long a user waits from page load until <strong>all</strong> GIFs on the page have accessibility captions. This depends on whether the model can process multiple GIFs concurrently:</p>
+    <table class="tbl" style="font-size:0.8rem">
+      <tr>
+        <td style="font-weight:700;color:var(--accent3);width:100px">CNN-LSTM<br>Parallel</td>
+        <td style="text-align:left">Uses 3 small ONNX sessions (EfficientNet, Encoder, Decoder) on WASM. All 10 GIF requests fire simultaneously and run concurrently. <strong>Total time ≈ slowest single GIF</strong> (~11s), not 10x per-GIF time. Despite 847ms inference per GIF, the total includes OCR and frame extraction overhead per GIF.</td>
+      </tr>
+      <tr>
+        <td style="font-weight:700;color:var(--accent);width:100px">ViT-GPT2<br>Parallel</td>
+        <td style="text-align:left">Uses a single ONNX session via <code>pipeline("image-to-text")</code> on WebGPU. Multiple GIFs can queue operations on the same session without conflict. <strong>All 10 GIFs complete within ~3s of each other</strong> after the model loads (22s one-time). Excl. model load: 13.3s.</td>
+      </tr>
+      <tr>
+        <td style="font-weight:700;color:var(--accent2);width:100px">SmolVLM<br>Sequential</td>
+        <td style="text-align:left">Uses <strong>3 separate ONNX sessions</strong> (vision_encoder, embed_tokens, decoder_model_merged) on WebGPU. When <code>generate()</code> runs, it calls all 3 sessions in sequence. A second <code>generate()</code> call would conflict ("Session already started" error). <strong>Total time ≈ N x per-GIF time</strong>: 10 GIFs x ~11s = 113.6s.</td>
+      </tr>
+    </table>
+    <p style="color:var(--muted);font-size:0.8rem;margin-top:8px"><strong>Why SmolVLM can't parallelize:</strong> The Idefics3 architecture splits into 3 ONNX sessions (vision encoder, token embeddings, language decoder). WebGPU's JSEP backend cannot run multiple sessions concurrently. This is an architectural limitation, not a model size issue - a 10GB single-session model could parallelize, while a 50MB three-session model cannot.</p>
+  </div>
+
+  <div class="info">
+    <h4>Key Findings</h4>
+    <ul>
+      <li><strong>CNN-LSTM is the fastest</strong> despite running on CPU (WASM). Its 16.8M params make GPU overhead unnecessary. 847ms inference vs 9-13s for transformer models.</li>
+      <li><strong>SmolVLM has the best semantic metrics</strong> (CIDEr 0.375, METEOR 0.212) but the worst latency (113.6s for 10 GIFs) due to sequential ONNX session lock.</li>
+      <li><strong>ViT-GPT2 benefits from parallel processing</strong> - despite 13s per-GIF inference, all 10 GIFs finish in 13.3s because they run concurrently.</li>
+      <li><strong>Model size matters more than GPU</strong> for browser deployment. The tiny CNN-LSTM on WASM outperforms 278M-param ViT-GPT2 on WebGPU.</li>
+      <li><strong>ONNX conversion is the deployment bottleneck</strong>. SmolVLM's Idefics3 architecture cannot be converted to ONNX, preventing browser deployment of the fine-tuned model.</li>
+      <li><strong>Architecture determines distillation success</strong>. LLaVA distillation improved SmolVLM (native multi-image) but degraded ViT-GPT2 (single-image encoder can't read grids).</li>
+    </ul>
+  </div>
+</div>
+
+</div>
+
+<script>
+// Animate PTA bars on scroll
+let ptaAnimated = false;
+function checkPTA() {
+  if (ptaAnimated) return;
+  const cards = document.querySelector('.pta-cards');
+  if (cards && cards.getBoundingClientRect().top < window.innerHeight) {
+    ptaAnimated = true;
+    document.querySelectorAll('.pta-bar').forEach(bar => {
+      bar.style.width = '0';
+      requestAnimationFrame(() => {
+        bar.style.width = bar.style.getPropertyValue('--target-width');
+      });
+    });
+  }
+}
+window.addEventListener('scroll', checkPTA);
+window.addEventListener('load', () => setTimeout(checkPTA, 500));
+</script>
+</body>
+</html>

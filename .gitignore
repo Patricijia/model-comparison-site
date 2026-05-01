@@ -1,0 +1,26 @@
+# Dependencies
+node_modules/
+.venv/
+__pycache__/
+
+# Large model files
+*.onnx
+*.onnx.data
+*.safetensors
+*.bin
+*.pt
+*.pth
+*.so
+
+# HuggingFace cache
+models--*/
+.locks/
+
+# Build artifacts
+dist/
+
+# OS
+.DS_Store
+
+# Trained data
+*.traineddata

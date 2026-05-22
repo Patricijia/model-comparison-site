@@ -675,11 +675,11 @@
             <line x1="14" y1="80" x2="22" y2="80"/>
             <line x1="138" y1="80" x2="146" y2="80"/>
           </g>
-          <text x="80" y="72" text-anchor="middle" fill="var(--text)" font-size="28" font-weight="700" id="clock-val-aporva">11.3s</text>
+          <text x="80" y="72" text-anchor="middle" fill="var(--text)" font-size="28" font-weight="700" id="clock-val-aporva">13.9s</text>
           <text x="80" y="94" text-anchor="middle" fill="var(--muted)" font-size="11">page to accessible</text>
         </svg>
-        <div class="clock-detail">Browser (WASM, parallel)</div>
-        <div class="clock-detail">Excl. one-time model load (0.4s)</div>
+        <div class="clock-detail">Browser (WASM, OCR on)</div>
+        <div class="clock-detail">Without OCR: 8.7s</div>
       </div>
 
       <!-- SmolVLM clock -->
@@ -717,11 +717,11 @@
             <line x1="14" y1="80" x2="22" y2="80"/>
             <line x1="138" y1="80" x2="146" y2="80"/>
           </g>
-          <text x="80" y="72" text-anchor="middle" fill="var(--text)" font-size="28" font-weight="700" id="clock-val-vitgpt2">13.3s</text>
+          <text x="80" y="72" text-anchor="middle" fill="var(--text)" font-size="28" font-weight="700" id="clock-val-vitgpt2">8.4s</text>
           <text x="80" y="94" text-anchor="middle" fill="var(--muted)" font-size="11">page to accessible</text>
         </svg>
-        <div class="clock-detail">Browser (WebGPU, no server)</div>
-        <div class="clock-detail">Excl. one-time model load (22s)</div>
+        <div class="clock-detail">Browser (WebGPU, TGIF-fine-tuned, OCR on)</div>
+        <div class="clock-detail">6-frame 2x3 grid → single caption</div>
       </div>
     </div>
 
@@ -730,10 +730,11 @@
     <div class="latency-section">
       <div class="clock-card">
         <h4 style="color: var(--accent3)">CNN-LSTM Retrained</h4>
-        <div class="clock-value" style="color: var(--accent3)">847</div>
-        <div class="clock-unit">ms per GIF (inference)</div>
-        <div class="clock-detail">Browser WASM, 16 frames, parallel</div>
-        <div class="clock-detail">+OCR: ~3s total per GIF</div>
+        <div class="clock-value" style="color: var(--accent3)">845</div>
+        <div class="clock-unit">ms pure inference per GIF</div>
+        <div class="clock-detail">Browser WASM, 16 frames, sequential</div>
+        <div class="clock-detail">Pipeline incl. OCR: 12,590 ms</div>
+        <div class="clock-detail">Pipeline excl. OCR: 4,891 ms</div>
       </div>
       <div class="clock-card">
         <h4 style="color: var(--accent2)">SmolVLM-256M</h4>
@@ -743,33 +744,63 @@
         <div class="clock-detail">Single VLM call + ~3.1s grid build</div>
       </div>
       <div class="clock-card">
-        <h4 style="color: var(--accent)">ViT-GPT2</h4>
-        <div class="clock-value" style="color: var(--accent)">13,057</div>
-        <div class="clock-unit">ms per GIF</div>
-        <div class="clock-detail">Browser WebGPU, 4 frames</div>
-        <div class="clock-detail">~3,264 ms per frame inference</div>
+        <h4 style="color: var(--accent)">ViT-GPT2 TGIF</h4>
+        <div class="clock-value" style="color: var(--accent)">6,137</div>
+        <div class="clock-unit">ms inference per GIF</div>
+        <div class="clock-detail">Browser WebGPU, 6-frame 2x3 grid</div>
+        <div class="clock-detail">Pipeline (incl. OCR): 8,326 ms</div>
       </div>
     </div>
 
-    <!-- ViT-GPT2 detailed timing breakdown -->
+    <!-- CNN-LSTM detailed timing breakdown + OCR bottleneck -->
     <div class="chart-container">
-      <h4>ViT-GPT2 Timing Breakdown (10-GIF benchmark)</h4>
+      <h4>CNN-LSTM Timing Breakdown (10-GIF benchmark, n=50)</h4>
       <table class="metrics-table" style="margin-top:16px">
         <thead>
           <tr>
             <th>Phase</th>
-            <th>Time</th>
+            <th>OCR on (mean)</th>
+            <th>OCR off (mean)</th>
+            <th>Δ</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Frame Extraction</td><td>6,092 ms</td><td>4,048 ms</td><td>+2,044 ms (extra native-res frames for OCR)</td></tr>
+          <tr><td>CNN feature extraction</td><td>818 ms</td><td>818 ms</td><td>~0 (model-bound)</td></tr>
+          <tr><td>BiLSTM encoder</td><td>7 ms</td><td>7 ms</td><td>0</td></tr>
+          <tr><td>Attention decoder</td><td>19 ms</td><td>18 ms</td><td>~0</td></tr>
+          <tr><td>Total Inference</td><td>845 ms</td><td>844 ms</td><td>~0</td></tr>
+          <tr><td>OCR (Tesseract, parallel)</td><td>6,498 ms</td><td>0 ms</td><td>+6,498 ms (on critical path)</td></tr>
+          <tr><td>Per-GIF Pipeline</td><td>12,590 ms</td><td>4,891 ms</td><td>+7,699 ms (2.6x)</td></tr>
+          <tr style="font-weight:700;background:#22253a"><td>All 10 GIFs Accessible</td><td>13,866 ms</td><td>8,725 ms</td><td>+5,141 ms (+59%)</td></tr>
+          <tr><td colspan="4" style="text-align:left; color:var(--muted); font-size:0.85rem; padding-top:16px; border-bottom:none">
+            <strong>OCR is the dominant bottleneck for CNN-LSTM:</strong> Tesseract on native-resolution frames (~6.5s/GIF) is ~8x slower than the actual model (845ms). Even though OCR runs in parallel with captioning via <code>Promise.all</code>, captioning is so fast it can't shadow OCR — the entire OCR cost lands on the critical path. Verified by toggling OCR off (<code>?ocr=off</code>): page-level latency drops from 13.9s to 8.7s.
+            <br><br><strong>Variance:</strong> per-run page time is extremely tight — std=127ms (OCR on), std=36ms (OCR off) over 50 runs.
+          </td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ViT-GPT2 TGIF detailed timing breakdown -->
+    <div class="chart-container">
+      <h4>ViT-GPT2 TGIF Timing Breakdown (10-GIF benchmark, n=50, OCR on)</h4>
+      <table class="metrics-table" style="margin-top:16px">
+        <thead>
+          <tr>
+            <th>Phase</th>
+            <th>Time (mean)</th>
             <th>Notes</th>
           </tr>
         </thead>
         <tbody>
-          <tr><td>Frame Extraction (avg)</td><td>4,628 ms</td><td>4 frames per GIF</td></tr>
-          <tr><td>Inference (avg)</td><td>13,057 ms</td><td>4 frames x ~3,264 ms each</td></tr>
-          <tr><td>Per-frame Inference</td><td>3,264 ms</td><td>Single ViT-GPT2 forward pass</td></tr>
-          <tr style="font-weight:700;background:#22253a"><td>All 10 GIFs Accessible</td><td>~13,300 ms</td><td>Parallel processing (excl. model load)</td></tr>
+          <tr><td>Frame Extraction</td><td>2,189 ms</td><td>6 frames → 2x3 grid (512x512 JPEG)</td></tr>
+          <tr><td>Inference</td><td>6,137 ms</td><td>Single VLM forward pass on grid (WebGPU)</td></tr>
+          <tr><td>OCR (parallel)</td><td>≤ inference</td><td>Tesseract.js on 2 native-res frames; runs concurrently with caption</td></tr>
+          <tr><td>Per-GIF Pipeline (total)</td><td>8,326 ms</td><td>Frame ext + max(inference, OCR)</td></tr>
+          <tr style="font-weight:700;background:#22253a"><td>All 10 GIFs Accessible</td><td>~8,358 ms</td><td>Page-load to last-aria-label, std=110ms</td></tr>
           <tr><td colspan="3" style="text-align:left; color:var(--muted); font-size:0.85rem; padding-top:16px; border-bottom:none">
-            <strong>One-time costs (first visit only):</strong> Model download & init: 22,063 ms | OCR (Tesseract.js) init: 227 ms.
-            These are cached after first load and do not recur on subsequent page navigations.
+            <strong>OCR shadowing:</strong> per-GIF <code>ocrMs</code> matches inference time exactly (mean=6,137ms, std=121ms each), strongly indicating OCR finishes before captioning and is fully shadowed.
+            <br><strong>One-time costs (first visit only):</strong> Model download &amp; init + OCR worker init. Cached after first load.
           </td></tr>
         </tbody>
       </table>
@@ -1330,9 +1361,9 @@ function animateClocks() {
   const circumference = 2 * Math.PI * 70; // ~440
   const maxMs = 120000; // max scale (120s)
 
-  // CNN-LSTM: 11.3s page-to-accessible (parallel, excl. 0.4s model load)
+  // CNN-LSTM: 13.9s page-to-accessible (OCR on, n=50)
   const aporvaRing = document.getElementById('clock-aporva');
-  const aporvaPct = Math.min(11300 / maxMs, 1);
+  const aporvaPct = Math.min(13866 / maxMs, 1);
   setTimeout(() => {
     aporvaRing.style.transition = 'stroke-dashoffset 1.5s ease';
     aporvaRing.style.strokeDashoffset = circumference * (1 - aporvaPct);
@@ -1346,9 +1377,9 @@ function animateClocks() {
     smolRing.style.strokeDashoffset = circumference * (1 - smolPct);
   }, 100);
 
-  // ViT-GPT2: ~13.3s page-to-accessible (excl. 22s model load)
+  // ViT-GPT2 TGIF (grid): 8.4s page-to-accessible (OCR on, n=50)
   const vitRing = document.getElementById('clock-vitgpt2');
-  const vitPct = Math.min(13300 / maxMs, 1);
+  const vitPct = Math.min(8358 / maxMs, 1);
   setTimeout(() => {
     vitRing.style.transition = 'stroke-dashoffset 1.5s ease';
     vitRing.style.strokeDashoffset = circumference * (1 - vitPct);
